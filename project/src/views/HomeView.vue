@@ -64,7 +64,6 @@
                     </div>
                     
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <!-- Sights (관광지) -->
                         <button id="btn-cat-관광지" onclick="toggleCategory('관광지')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -73,12 +72,11 @@
                                 <i id="dot-관광지" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">관광지</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">경치·공원·자연 명소</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">관광지</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">경치·공원·자연 명소</div>
                             </div>
                         </button>
 
-                        <!-- Culture (문화시설) -->
                         <button id="btn-cat-문화시설" onclick="toggleCategory('문화시설')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -87,12 +85,11 @@
                                 <i id="dot-문화시설" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">문화시설</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">미술관·박물관·체험관</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">문화시설</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">미술관·박물관·체험관</div>
                             </div>
                         </button>
 
-                        <!-- Festival (축제공연행사) -->
                         <button id="btn-cat-축제공연행사" onclick="toggleCategory('축제공연행사')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -101,12 +98,11 @@
                                 <i id="dot-축제공연행사" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">축제공연행사</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">축제·야시장·박람회</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">축제공연행사</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">축제·야시장·박람회</div>
                             </div>
                         </button>
 
-                        <!-- Course (여행코스) -->
                         <button id="btn-cat-여행코스" onclick="toggleCategory('여행코스')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -115,12 +111,11 @@
                                 <i id="dot-여행코스" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">여행코스</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">역사순례·1박2일코스</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">여행코스</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">역사순례·1박2일코스</div>
                             </div>
                         </button>
 
-                        <!-- Leisure (레포츠) -->
                         <button id="btn-cat-레포츠" onclick="toggleCategory('레포츠')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -129,12 +124,11 @@
                                 <i id="dot-레포츠" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">레포츠</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">레저·야영장·짚트랙</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">레포츠</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">레저·야영장·짚트랙</div>
                             </div>
                         </button>
 
-                        <!-- Lodging (숙박) -->
                         <button id="btn-cat-숙박" onclick="toggleCategory('숙박')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -143,12 +137,11 @@
                                 <i id="dot-숙박" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">숙박</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">게하·한옥체험·호텔</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">숙박</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">게하·한옥체험·호텔</div>
                             </div>
                         </button>
 
-                        <!-- Shopping (쇼핑) -->
                         <button id="btn-cat-쇼핑" onclick="toggleCategory('쇼핑')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -157,12 +150,11 @@
                                 <i id="dot-쇼핑" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">쇼핑</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">전통오일장·특산품점</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">쇼핑</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">전통오일장·특산품점</div>
                             </div>
                         </button>
 
-                        <!-- Restaurant (음식점) -->
                         <button id="btn-cat-음식점" onclick="toggleCategory('음식점')" class="group relative py-4 px-4 rounded-2xl border-2 border-[#090b0e]/15 bg-white text-left transition-all duration-300 shadow-md flex flex-col justify-between min-h-[115px]">
                             <div class="flex items-center justify-between w-full">
                                 <span class="w-8 h-8 rounded-xl bg-[#090b0e] text-white flex items-center justify-center text-xs group-hover:scale-110 transition-transform">
@@ -171,8 +163,8 @@
                                 <i id="dot-음식점" class="fa-solid fa-circle-check text-xs text-transparent transition-colors"></i>
                             </div>
                             <div class="mt-3">
-                                <div class="text-sm font-black text-[#090b0e] tracking-tight">음식점</div>
-                                <div class="text-[10px] text-gray-700 font-medium mt-0.5 opacity-80">로컬맛집·한정식·카페</div>
+                                <div class="cat-title text-sm font-black text-[#090b0e] tracking-tight transition-colors">음식점</div>
+                                <div class="cat-desc text-[10px] text-gray-700 font-medium mt-0.5 opacity-80 transition-colors">로컬맛집·한정식·카페</div>
                             </div>
                         </button>
                     </div>
@@ -331,16 +323,27 @@ export default {
         toggleCategory(cat) {
             const btn = document.getElementById(`btn-cat-${cat}`);
             const dot = document.getElementById(`dot-${cat}`);
+
+            // 💡 텍스트 색상 제어를 위해 버튼 내부의 타이틀과 설명 엘리먼트를 가져옵니다.
+            const title = btn ? btn.querySelector('.cat-title') : null;
+            const desc = btn ? btn.querySelector('.cat-desc') : null;
+
             if (this.activeCategories.includes(cat)) {
                 this.activeCategories = this.activeCategories.filter(item => item !== cat);
+                // 비활성화 상태: 배경 흰색 / 글자 검은색 회귀
                 if (btn) btn.classList.remove('bg-gray-900', 'text-white', 'border-yellow-400');
                 if (btn) btn.classList.add('bg-white', 'text-[#090b0e]', 'border-[#090b0e]/15');
+                if (title) title.classList.replace('text-white', 'text-[#090b0e]');
+                if (desc) desc.classList.replace('text-gray-300', 'text-gray-700');
                 if (dot) dot.classList.remove('text-[#38bdf8]');
                 if (dot) dot.classList.add('text-transparent');
             } else {
                 this.activeCategories.push(cat);
+                // 활성화 상태: 배경 검은색 / 글자 흰색 반전 🌟
                 if (btn) btn.classList.remove('bg-white', 'text-[#090b0e]', 'border-[#090b0e]/15');
                 if (btn) btn.classList.add('bg-gray-900', 'text-white', 'border-yellow-400');
+                if (title) title.classList.replace('text-[#090b0e]', 'text-white');
+                if (desc) desc.classList.replace('text-gray-700', 'text-gray-300');
                 if (dot) dot.classList.remove('text-transparent');
                 if (dot) dot.classList.add('text-[#38bdf8]');
             }
@@ -351,13 +354,24 @@ export default {
         // 필터 초기화 버튼 클릭 시 실행
         resetFilters() {
             this.activeCategories = [];
-            // 화면에 그려진 8개의 카테고리 불빛을 직접 다 꺼줍니다.
             const allCategories = ["관광지", "문화시설", "축제공연행사", "여행코스", "레포츠", "숙박", "쇼핑", "음식점"];
             allCategories.forEach(cat => {
                 const btn = document.getElementById(`btn-cat-${cat}`);
+                const title = btn ? btn.querySelector('.cat-title') : null;
+                const desc = btn ? btn.querySelector('.cat-desc') : null;
+
                 if (btn) {
                     btn.classList.remove('bg-gray-900', 'text-white', 'border-yellow-400');
                     btn.classList.add('bg-white', 'text-[#090b0e]', 'border-[#090b0e]/15');
+                }
+                // 초기화 시 글자색도 원상복구 🔄
+                if (title) {
+                    title.classList.remove('text-white');
+                    title.classList.add('text-[#090b0e]');
+                }
+                if (desc) {
+                    desc.classList.remove('text-gray-300');
+                    desc.classList.add('text-gray-700');
                 }
                 const dot = document.getElementById(`dot-${cat}`);
                 if (dot) {
