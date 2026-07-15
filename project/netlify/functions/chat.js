@@ -25,6 +25,7 @@ export const handler = async (event) => {
   })
 
   const data = await response.json()
+  console.log('status:', response.status, 'body:', JSON.stringify(data))
 
   if (!response.ok) {
     return {
