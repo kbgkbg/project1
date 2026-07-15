@@ -3,28 +3,26 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getRegionBenefits } from '../data/regionBenefits'
 import { findStoreCoupons } from '../data/storeCoupons'
+import { usePickedStore } from '../stores/picked'
 
 const router = useRouter()
+const pickedStore = usePickedStore()
 
-/* ────────────────────────────────────────────────────────────
-   ① 장소 데이터 (지금은 더미. 나중에 이 부분만 스토어로 교체)
-   통합 시:
-     import { usePickedStore } from '../stores/picked'
-     const place = usePickedStore().place
-   더미는 우리가 정한 "데이터 약속" 모양 그대로라 화면 코드는 안 바뀜.
-   ──────────────────────────────────────────────────────────── */
+if (!pickedStore.place) {
+  router.replace('/')
+}
+
 const place = reactive({
-  id: 'lv-6652',
-  name: '다봄',
-  category: '음식점',
-  address: '전남 완도군 완도읍 중앙길 15-1',
-  tel: '061-555-6363',
-  // 데이터셋의 firstimage(관광공사) / imgUrl(쿠폰)이 여기 들어옴. 없으면 빈 문자열.
-  image: 'http://tong.visitkorea.or.kr/cms/resource/80/3029180_image2_1.jpg',
-  lat: 34.3140839828631,
-  lng: 126.757399325968,
-  // 뽑힌 장소엔 쿠폰이 없을 수 있음 → 아래에서 사랑가게 목록과 대조해 자동 매칭
+  id: '',
+  name: '',
+  category: '',
+  address: '',
+  tel: '',
+  image: '',
+  lat: 0,
+  lng: 0,
   coupons: [],
+  ...pickedStore.place,
 })
 
 // 이미지가 없을 때 이름 첫 글자로 플레이스홀더

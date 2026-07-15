@@ -88,8 +88,11 @@
             <h3 class="text-sm text-slate-300 font-bold mb-2">Result</h3>
             <div v-if="selected" class="bg-[#071018] p-3 rounded-lg border border-slate-800">
               <div class="text-white font-bold">{{ selected.emoji }} {{ selected.name }}</div>
-              <div class="text-xs text-slate-400 mt-1">{{ selected.desc }}</div>
-              <div class="text-[11px] text-slate-400 mt-2">Lat {{ selected.lat }}, Lng {{ selected.lng }}</div>
+              <div class="text-xs text-slate-400 mt-1">{{ selected.category }}</div>
+              <div class="text-[11px] text-slate-400 mt-1">{{ selected.address }}</div>
+              <button @click="goToPlace" class="mt-3 w-full py-2 bg-amber-400 text-slate-900 font-bold rounded-lg text-xs">
+                이 장소 보러가기 →
+              </button>
             </div>
             <div v-else class="text-xs text-slate-400">아직 선택된 장소가 없습니다.</div>
           </div>
@@ -112,58 +115,99 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { usePickedStore } from '../stores/picked'
+import lovegetRaw from '../../../dataset/LovegetStoreInfoList.json'
+
+const router = useRouter()
+const pickedStore = usePickedStore()
 
 const localTourType = ref('food')
 const gameMode = ref('dart')
 const selected = ref(null)
 const mapContainer = ref(null)
 
-// datasets (loaded from public/dataset/*.json)
-const rawFood = ref([])
-const rawAttraction = ref([])
-const foodSpotsLoaded = ref([])
-const attractionSpotsLoaded = ref([])
+const CATEGORY_FILE_MAP = {
+  '관광지': '광주_전라권_관광지.json',
+  '문화시설': '광주_전라권_문화시설.json',
+  '축제공연행사': '광주_전라권_축제공연행사.json',
+  '여행코스': '광주_전라권_여행코스.json',
+  '레포츠': '광주_전라권_레포츠.json',
+  '숙박': '광주_전라권_숙박.json',
+  '쇼핑': '광주_전라권_쇼핑.json',
+  '음식점': '광주_전라권_음식점.json',
+}
 
-const normalizeItem = (item) => {
+const normalizeItem = (item, category = '') => {
   const name = item.name || item.명칭 || item.시설명 || item.title || item.NAME || item.name_ko
-  const lat = item.lat || item.latitude || item.위도 || item.mapy || item.MAPY || item.Y || item.경도 || item.LAT
+  const lat = item.lat || item.latitude || item.위도 || item.mapy || item.MAPY || item.Y || item.LAT
   const lng = item.lng || item.longitude || item.경도 || item.mapx || item.MAPX || item.X || item.LNG
-  const desc = item.desc || item.설명 || item.summary || item.소개 || item.firstimage || ''
+  const address = item.addr1 || item.address || item.주소 || item.소재지도로명주소 || item.소재지지번주소 || ''
+  const tel = item.tel || item.전화번호 || item.TELNO || ''
+  const image = item.firstimage || item.imgUrl || item.image || ''
   return {
     id: item.contentid ?? item.id ?? (name ? name : Math.random().toString(36).slice(2, 9)),
     name,
     lat: Number(lat),
     lng: Number(lng),
-    desc,
-    emoji: item.emoji || '📍'
+    address,
+    tel,
+    image,
+    category,
+    emoji: item.emoji || '📍',
+    coupons: [],
   }
 }
 
+const activeList = ref([])
+
+const normalizeLoveget = (item) => ({
+  id: `lv-${item.storeId}`,
+  name: item.storeNm || '',
+  lat: Number(item.lat),
+  lng: Number(item.lng),
+  address: item.addr || '',
+  tel: item.phone || '',
+  image: item.imgUrl || '',
+  category: item.storeKind || '사랑가게',
+  emoji: '🏪',
+  coupons: [],
+})
+
 const loadDatasets = async () => {
   try {
-    const base = '/dataset'
-    const [foodRes, attrRes] = await Promise.all([
-      fetch(`${base}/광주_전라권_음식점.json`),
-      fetch(`${base}/광주_전라권_관광지.json`)
-    ])
-    rawFood.value = await foodRes.json()
-    rawAttraction.value = await attrRes.json()
+    const cats = pickedStore.categories.length
+      ? pickedStore.categories
+      : Object.keys(CATEGORY_FILE_MAP)
 
-    const foodArr = Array.isArray(rawFood.value) ? rawFood.value : (rawFood.value.items || [])
-    const attrArr = Array.isArray(rawAttraction.value) ? rawAttraction.value : (rawAttraction.value.items || [])
+    const results = await Promise.all(
+      cats.map(cat => {
+        const filename = CATEGORY_FILE_MAP[cat]
+        if (!filename) return Promise.resolve([])
+        return fetch(`/dataset/${encodeURIComponent(filename)}`)
+          .then(r => r.json())
+          .then(data => {
+            const arr = Array.isArray(data) ? data : (data.items || [])
+            return arr.map(item => normalizeItem(item, cat))
+          })
+          .catch(() => [])
+      })
+    )
 
-    foodSpotsLoaded.value = foodArr.map(normalizeItem).filter(i => i.lat && i.lng)
-    attractionSpotsLoaded.value = attrArr.map(normalizeItem).filter(i => i.lat && i.lng)
+    const lovegetItems = (lovegetRaw.body?.items || [])
+      .map(normalizeLoveget)
+      .filter(i => i.lat && i.lng && cats.includes(i.category))
 
-    loadActive()
+    activeList.value = [...results.flat(), ...lovegetItems].filter(i => i.lat && i.lng)
   } catch (err) {
     console.error('dataset load failed', err)
   }
 }
 
-const activeList = ref([])
-const loadActive = () => {
-  activeList.value = (localTourType.value === 'food' ? foodSpotsLoaded.value : attractionSpotsLoaded.value)
+function goToPlace() {
+  if (!selected.value) return
+  pickedStore.place = { ...selected.value }
+  router.push({ name: 'place', params: { id: selected.value.id } })
 }
 
 const btnClass = (on) => on ? 'px-3 py-1 bg-teal-500 text-slate-900 rounded-md' : 'px-3 py-1 bg-slate-800 rounded-md'
