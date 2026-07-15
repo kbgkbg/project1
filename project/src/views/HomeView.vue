@@ -27,34 +27,49 @@
         <div id="home-screen" class="screen-fade grid grid-cols-1 md:grid-cols-12 gap-5 z-10">
             
             <!-- CARD 1 (Top Hero: Bright Golden Yellow Card containing Big chunky filters) -->
-            <div class="md:col-span-12 lg:col-span-8 bg-yellow-400 rounded-[32px] p-6 md:p-8 text-[#090b0e] relative overflow-hidden flex flex-col justify-between min-h-[460px] md:min-h-[480px] shadow-lg">
+            <div class="md:col-span-12 lg:col-span-12 bg-yellow-400 rounded-[32px] p-6 md:p-8 text-[#090b0e] relative overflow-hidden flex flex-col justify-between min-h-[460px] md:min-h-[480px] shadow-lg">
                 
-                <!-- Decorative Orbit Elements (Styling matching face graphic layout in image_eb3829.jpg) -->
-                <div class="absolute right-0 top-1/2 -translate-y-1/2 w-full md:w-[42%] aspect-square max-w-[320px] pointer-events-none hidden lg:block opacity-90">
-                    <div class="absolute inset-0 border border-[#090b0e]/10 rounded-full orbiting-track">
-                        <div class="absolute top-1/4 left-0 w-3 h-3 bg-[#090b0e] rounded-full"></div>
-                        <div class="absolute bottom-1/4 right-0 w-2.5 h-2.5 bg-[#090b0e] rounded-full"></div>
-                    </div>
-                    <div class="absolute inset-8 border border-[#090b0e]/20 rounded-full"></div>
-                    <div class="absolute inset-16 border-2 border-dashed border-[#090b0e]/25 rounded-full"></div>
-                    <!-- Central badge representing Namdorang unified pool -->
-                    <div class="absolute inset-24 bg-[#090b0e] rounded-full flex flex-col items-center justify-center p-3 text-white text-center shadow-2xl">
-                        <span class="text-[9px] font-black tracking-widest uppercase leading-tight text-yellow-400">NAMDO</span>
-                        <span class="text-[14px] font-black tracking-tight leading-none mt-0.5">UNIFIED</span>
-                    </div>
-                </div>
+                <!-- TOP ROW: Headings (left) + Direct Lucky Launcher (right), matched heights -->
+                <div class="flex flex-col lg:flex-row lg:items-stretch gap-6 lg:gap-8">
 
-                <!-- Text Headings (Instagram-style cozy tone) -->
-                <div class="space-y-3 max-w-2xl">
-                    <span class="text-[10px] font-black tracking-widest uppercase bg-[#090b0e] text-yellow-400 px-3.5 py-1.5 rounded-lg">
-                        PUBLIC DATA x BENEFIT AUTOMAPPING
-                    </span>
-                    <h1 class="text-3xl md:text-5xl font-black tracking-tighter leading-[1.05] mt-1 text-[#090b0e]">
-                        예상 밖의 여행,<br>기대 이상의 혜택.
-                    </h1>
-                    <p class="text-xs md:text-sm font-semibold opacity-90 leading-relaxed max-w-md">
-                         여행 계획 세우려 몇 시간째 블로그, 인스타만 보고 계신가요? 광고와 바이럴에 지친 검색은 이제 그만! 오늘은 고민 대신, 오늘은 한 번 뽑아보세요!  카테고리만 선택하면 광주·전라의 숨겨진 찐 가성비 스팟과 지자체 꿀할인 혜택을 운명처럼 매핑해 드릴게요! 🗺️💛
-                    </p>
+                    <!-- Text Headings (Instagram-style cozy tone) -->
+                    <div class="space-y-3 flex-1 min-w-0">
+                        <span class="text-[10px] font-black tracking-widest uppercase bg-[#090b0e] text-yellow-400 px-3.5 py-1.5 rounded-lg inline-block">
+                            PUBLIC DATA x BENEFIT AUTOMAPPING
+                        </span>
+                        <h1 class="text-3xl md:text-5xl font-black tracking-tighter leading-[1.05] mt-1 text-[#090b0e]">
+                            예상 밖의 여행,<br>기대 이상의 혜택.
+                        </h1>
+                        <p class="text-xs md:text-sm font-semibold opacity-90 leading-relaxed max-w-md">
+                             여행 계획 세우려 몇 시간째 블로그, 인스타만 보고 계신가요? 광고와 바이럴에 지친 검색은 이제 그만! 오늘은 고민 대신, 오늘은 한 번 뽑아보세요!  카테고리만 선택하면 광주·전라의 숨겨진 찐 가성비 스팟과 지자체 꿀할인 혜택을 운명처럼 매핑해 드릴게요! 🗺️💛
+                        </p>
+                    </div>
+
+                    <!-- Direct Lucky Launcher filling the top-right space -->
+                    <div class="w-full lg:w-[340px] lg:flex-shrink-0 flex flex-col justify-between bg-[#11141b] border border-gray-800/80 rounded-[28px] p-6 shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-400"></div>
+
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-mono tracking-widest text-yellow-400 uppercase font-black">SPIN CONTROLLER</span>
+                            <span id="spot-counter-badge" class="px-2.5 py-1 bg-yellow-400/10 text-yellow-400 text-[10px] font-black rounded-md border border-yellow-400/20">
+                                00 THEMES ACTIVE
+                            </span>
+                        </div>
+
+                        <div class="my-5">
+                            <h3 class="text-lg font-extrabold text-white leading-snug">
+                                필터링 조건 선택 완료!
+                            </h3>
+                            <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                                설정된 필터 조건에 부합하는 공간을 공공데이터셋에서 무작위 추출하고 <b class="text-gray-200">지자체별 할인 혜택을 즉시 자동 매핑</b>합니다.
+                            </p>
+                        </div>
+
+                        <button onclick="goToPickView()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-4 rounded-2xl font-black text-sm transition-all duration-300 flex items-center justify-center gap-2 group shadow-xl shadow-yellow-400/10">
+                            <span>오늘의 여행 뽑기</span>
+                            <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-1 transition-transform"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- OVERSIZED CHUNKY THEME FILTERS -->
@@ -172,7 +187,7 @@
             </div>
 
             <!-- CARD 2 (Left Lower: Sand Beige Bento Card - Inspired by METLY aesthetics) -->
-            <div class="md:col-span-12 lg:col-span-8 bg-[#eddccb] rounded-[32px] p-6 md:p-8 text-[#090b0e] shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+            <div class="md:col-span-12 lg:col-span-12 bg-[#eddccb] rounded-[32px] p-6 md:p-8 text-[#090b0e] shadow-lg relative overflow-hidden flex flex-col justify-between min-h-[220px]">
                 <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/20 rounded-full blur-xl pointer-events-none"></div>
                 
                 <div class="space-y-4 z-10">
@@ -230,34 +245,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- CARD 3 (Right Lower: Deep Slate Black Direct Lucky Launcher) -->
-            <div class="md:col-span-12 lg:col-span-4 bg-[#11141b] border border-gray-800/80 rounded-[32px] p-6 flex flex-col justify-between min-h-[220px] shadow-lg relative group overflow-hidden">
-                <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-400"></div>
-                
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-mono tracking-widest text-yellow-400 uppercase font-black">SPIN CONTROLLER</span>
-                    <!-- Status Badge -->
-                    <span id="spot-counter-badge" class="px-2.5 py-1 bg-yellow-400/10 text-yellow-400 text-[10px] font-black rounded-md border border-yellow-400/20">
-                        00 THEMES ACTIVE
-                    </span>
-                </div>
-
-                <div class="my-4">
-                    <h3 class="text-lg font-extrabold text-white leading-snug">
-                        필터링 조건 선택 완료!
-                    </h3>
-                    <p class="text-xs text-gray-400 mt-1">
-                        설정된 필터 조건에 부합하는 공간을 공공데이터셋에서 무작위 추출하고 <b>지자체별 할인 혜택을 즉시 자동 매핑</b>합니다.
-                    </p>
-                </div>
-
-                <!-- Big Direct Launch Action Lever -->
-                <button onclick="goToPickView()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-4 rounded-2xl font-black text-xs transition-all duration-300 flex items-center justify-center gap-2 group shadow-xl shadow-yellow-400/5">
-                 <span>오늘의 여행 뽑기</span>
-                 <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
-                 </button>
             </div>
 
         </div>
