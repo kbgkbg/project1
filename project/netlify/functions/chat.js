@@ -1,4 +1,4 @@
-exports.handler = async (event) => {
+export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' }
   }
@@ -24,11 +24,16 @@ exports.handler = async (event) => {
     }),
   })
 
+  const data = await response.json()
+
   if (!response.ok) {
-    return { statusCode: response.status, body: 'OpenAI 요청 실패' }
+    return {
+      statusCode: response.status,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: data?.error?.message || 'OpenAI 요청 실패' }),
+    }
   }
 
-  const data = await response.json()
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
