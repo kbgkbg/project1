@@ -35,6 +35,7 @@
         <button @click="setGameMode('dart')" :class="btnClass(gameMode==='dart')">🎯 다트</button>
         <button @click="setGameMode('slot')" :class="btnClass(gameMode==='slot')">🎰 슬롯</button>
       </div>
+      <button @click="goHome" class="flex items-center gap-1 px-3 py-1 bg-gray-900 border border-gray-800/80 rounded-md text-xs font-bold text-gray-300 hover:text-yellow-400 hover:border-yellow-400/50 transition">🏠 홈</button>
     </div>
 
     <!-- 다트 게이지 HUD -->
