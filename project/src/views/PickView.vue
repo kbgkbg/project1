@@ -9,11 +9,11 @@
       class="absolute left-1/2 top-1/2 z-30 pointer-events-none"
     >
       <!-- 중심 회전축 -->
-      <div class="absolute -left-2 -top-2 w-4 h-4 rounded-full bg-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.9)]"></div>
-      <!-- 회전 막대 -->
+      <div class="absolute -left-2 -top-2 w-4 h-4 rounded-full bg-yellow-400 shadow-[0_0_14px_rgba(250,204,21,0.9)]"></div>
+      <!-- 회전 막대 (360° 회전) -->
       <div class="origin-left" :style="{ transform: `rotate(${-needleDeg}deg)` }">
         <div
-          class="h-2 w-48 rounded-full bg-gradient-to-r from-amber-300 via-amber-400 to-rose-500 shadow-[0_0_16px_rgba(251,146,60,0.85)]"
+          class="h-2 w-48 rounded-full bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-500 shadow-[0_0_16px_rgba(250,204,21,0.85)]"
           :class="{ 'animate-pulse': dartStage === 0 }"
         ></div>
         <span class="absolute top-1/2 -translate-y-1/2 left-48 -ml-1 text-2xl drop-shadow-lg">🎯</span>
@@ -26,16 +26,12 @@
     </div>
 
     <!-- 상단 플로팅 컨트롤 바 -->
-    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-40 flex flex-wrap items-center justify-center gap-2 bg-[#0b0f1d]/90 border border-slate-800 rounded-2xl px-3 py-2 backdrop-blur-md shadow-xl max-w-[92vw]">
-      <div class="flex items-center gap-2 pr-2 border-r border-slate-800">
-        <span class="text-xl">🎯</span>
-        <span class="text-xs font-black bg-gradient-to-r from-teal-400 via-amber-400 to-rose-400 bg-clip-text text-transparent font-title tracking-wide">오가다 전라</span>
-      </div>
-      <div class="flex gap-1 bg-slate-900/80 border border-slate-800 p-1 rounded-xl">
-        <button @click="setTour('food')" :class="btnClass(localTourType==='food')">🍕 먹거리</button>
-        <button @click="setTour('attraction')" :class="btnClass(localTourType==='attraction')">🏛 관광지</button>
-      </div>
-      <div class="flex gap-1 bg-slate-900/80 border border-slate-800 p-1 rounded-xl">
+    <div class="absolute top-4 left-1/2 -translate-x-1/2 z-40 flex flex-wrap items-center justify-center gap-2 bg-[#11141b]/95 border border-gray-800/80 rounded-2xl px-3 py-2 backdrop-blur-md shadow-2xl max-w-[92vw]">
+      <button @click="goHome" class="flex items-center gap-2 pr-3 border-r border-gray-800 group">
+        <span class="w-7 h-7 rounded-lg bg-yellow-400 flex items-center justify-center text-black font-black text-xs group-hover:scale-110 transition-transform">🎯</span>
+        <span class="text-sm font-black tracking-tight uppercase text-white">Namdo<span class="text-yellow-400">rang</span></span>
+      </button>
+      <div class="flex gap-1 bg-[#090b0e] border border-gray-800/80 p-1 rounded-xl">
         <button @click="setGameMode('dart')" :class="btnClass(gameMode==='dart')">🎯 다트</button>
         <button @click="setGameMode('slot')" :class="btnClass(gameMode==='slot')">🎰 슬롯</button>
       </div>
@@ -44,16 +40,16 @@
     <!-- 다트 게이지 HUD -->
     <div
       v-if="gameMode==='dart' && !selected"
-      class="absolute left-1/2 -translate-x-1/2 bottom-8 z-40 bg-[#071018]/90 border border-slate-800 rounded-2xl px-5 py-3 backdrop-blur text-center"
+      class="absolute left-1/2 -translate-x-1/2 bottom-8 z-40 bg-[#11141b]/95 border border-gray-800/80 rounded-2xl px-5 py-3 backdrop-blur text-center shadow-2xl"
     >
-      <div class="flex gap-4 items-center justify-center text-sm">
-        <div>조준 {{ Math.round(needleDeg) }}°</div>
-        <div>파워 {{ Math.floor(power) }}%</div>
+      <div class="flex gap-4 items-center justify-center text-sm font-black">
+        <div>조준 <span class="text-yellow-400">{{ Math.round(needleDeg) }}°</span></div>
+        <div>파워 <span class="text-yellow-400">{{ Math.floor(power) }}%</span></div>
       </div>
-      <div class="w-40 h-2 bg-slate-800 rounded-full overflow-hidden mt-2 mx-auto">
-        <div class="h-full bg-amber-400 transition-[width]" :style="{ width: power + '%' }"></div>
+      <div class="w-40 h-2 bg-[#090b0e] rounded-full overflow-hidden mt-2 mx-auto border border-gray-800">
+        <div class="h-full bg-yellow-400 transition-[width]" :style="{ width: power + '%' }"></div>
       </div>
-      <div class="text-xs text-amber-300 font-bold mt-2">
+      <div class="text-[11px] text-yellow-400 font-black uppercase tracking-wide mt-2">
         {{ dartStage === 0 ? '스페이스바로 조준 고정!' : dartStage === 1 ? '스페이스바를 한번 더 눌러 발사!' : '발사 중...' }}
       </div>
     </div>
@@ -61,12 +57,14 @@
     <!-- 슬롯 오버레이 -->
     <div v-if="gameMode==='slot' && !selected" class="absolute inset-0 z-40 flex items-center justify-center">
       <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-      <div class="relative z-10 w-72 bg-[#0b1220] rounded-3xl border border-slate-700 p-6 shadow-2xl">
-        <button @click="setGameMode('dart')" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-slate-800 text-slate-400 hover:bg-slate-700">✕</button>
-        <div class="text-center text-amber-400 font-black text-lg mb-4 font-title">🎰 슬롯머신</div>
+      <div class="relative z-10 w-72 bg-[#11141b] rounded-3xl border border-gray-800/80 p-6 shadow-2xl">
+        <div class="absolute top-0 left-0 w-1.5 h-full bg-yellow-400 rounded-l-3xl"></div>
+        <button @click="setGameMode('dart')" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-900 border border-gray-800 text-gray-400 hover:bg-gray-800">✕</button>
+        <div class="text-center text-[10px] font-mono tracking-widest text-yellow-400 uppercase font-black mb-1">SPIN CONTROLLER</div>
+        <div class="text-center text-white font-black text-lg mb-4">🎰 슬롯머신</div>
 
         <!-- 릴 창 (내부 내용물이 돌아감) -->
-        <div class="flex gap-2 justify-center bg-slate-950 rounded-2xl p-3 border-2 border-amber-500/60">
+        <div class="flex gap-2 justify-center bg-[#090b0e] rounded-2xl p-3 border-2 border-yellow-400/60">
           <div
             v-for="(reel, i) in reels"
             :key="i"
@@ -76,16 +74,16 @@
           </div>
         </div>
 
-        <div class="h-6 mt-3 text-center text-xs text-slate-300 truncate">{{ reelLabel }}</div>
+        <div class="h-6 mt-3 text-center text-xs text-gray-400 font-semibold truncate">{{ reelLabel }}</div>
 
         <button
           @click="startRoulette"
           :disabled="rouletteActive"
-          class="w-full mt-2 py-3 bg-rose-500 disabled:bg-slate-700 disabled:text-slate-400 rounded-xl font-bold"
+          class="w-full mt-2 py-3 bg-yellow-400 hover:bg-yellow-500 text-black disabled:bg-gray-800 disabled:text-gray-500 rounded-2xl font-black text-xs uppercase tracking-wide transition-all"
         >
           {{ rouletteActive ? '돌리는 중...' : '🎰 SPIN' }}
         </button>
-        <button @click="setGameMode('dart')" class="w-full mt-2 py-2 text-xs text-slate-400 hover:text-slate-200">← 지도로 돌아가기</button>
+        <button @click="setGameMode('dart')" class="w-full mt-2 py-2 text-xs text-gray-500 hover:text-yellow-400 transition">← 지도로 돌아가기</button>
       </div>
     </div>
 
@@ -99,7 +97,7 @@
         <p class="text-sm text-slate-500 mt-3">{{ selected.address }}</p>
         <div class="flex gap-2 mt-6">
           <button @click="closeResult" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold text-sm">다시 뽑기</button>
-          <button @click="goToPlace" class="flex-1 py-3 bg-amber-400 rounded-xl font-bold text-sm">보러가기 →</button>
+          <button @click="goToPlace" class="flex-1 py-3 bg-yellow-400 hover:bg-yellow-500 text-black rounded-xl font-black text-sm transition-all">보러가기 →</button>
         </div>
       </div>
     </div>
@@ -115,7 +113,6 @@ import lovegetRaw from '../../../dataset/LovegetStoreInfoList.json'
 const router = useRouter()
 const pickedStore = usePickedStore()
 
-const localTourType = ref('food')
 const gameMode = ref('dart')
 const selected = ref(null)
 const mapContainer = ref(null)
@@ -203,7 +200,11 @@ function goToPlace() {
   router.push({ name: 'place', params: { id: selected.value.id } })
 }
 
-const btnClass = (on) => on ? 'px-3 py-1 bg-teal-500 text-slate-900 rounded-md text-xs font-bold' : 'px-3 py-1 bg-slate-800 rounded-md text-xs font-bold text-slate-300'
+const goHome = () => router.push('/')
+
+const btnClass = (on) => on
+  ? 'px-3 py-1 bg-yellow-400 text-black rounded-md text-xs font-black uppercase tracking-wide'
+  : 'px-3 py-1 bg-gray-900 rounded-md text-xs font-bold text-gray-400 hover:text-gray-200'
 
 /* ---------- Leaflet 연동 (main.js에서 import한 경우를 전제로 함) ---------- */
 const leafletMap = ref(null)
@@ -248,17 +249,14 @@ watch(selected, (v) => {
 const dartVisual = reactive({ visible: false, x: 0, y: 0 })
 const needleDeg = ref(0)
 const power = ref(0)
-const dartStage = ref(0) // 0: 조준선 왕복 중, 1: 조준 고정, 2: 발사 중
-let needleDir = 1
+const dartStage = ref(0) // 0: 조준선 회전 중, 1: 조준 고정, 2: 발사 중
 let needleRAF = null
 let powerRAF = null
 
 const startNeedle = () => {
   if (needleRAF) return
   const step = () => {
-    needleDeg.value += 1.6 * needleDir
-    if (needleDeg.value > 80) needleDir = -1
-    if (needleDeg.value < -80) needleDir = 1
+    needleDeg.value = (needleDeg.value + 2.4) % 360
     needleRAF = requestAnimationFrame(step)
   }
   needleRAF = requestAnimationFrame(step)
@@ -393,12 +391,6 @@ const startRoulette = () => {
 }
 
 /* ---------- 헬퍼 & 라이프사이클 ---------- */
-const setTour = (t) => {
-  localTourType.value = t
-  selected.value = null
-  loadDatasets()
-}
-
 const setGameMode = (m) => {
   gameMode.value = m
   selected.value = null
