@@ -20,7 +20,7 @@ export const handler = async (event) => {
         },
         ...messages,
       ],
-      max_completion_tokens: 500,
+      max_completion_tokens: 2000,
     }),
   })
 
