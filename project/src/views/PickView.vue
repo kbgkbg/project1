@@ -5,7 +5,7 @@
 
     <!-- 다트 조준 막대 (방향 표시) -->
     <div
-      v-if="gameMode==='dart' && !selected && dartStage < 2"
+      v-if="gameMode==='dart' && !selected && dartStage < 3"
       class="absolute left-1/2 top-1/2 z-30 pointer-events-none"
     >
       <!-- 중심 회전축 -->
@@ -50,7 +50,7 @@
         <div class="h-full bg-yellow-400 transition-[width]" :style="{ width: power + '%' }"></div>
       </div>
       <div class="text-[11px] text-yellow-400 font-black uppercase tracking-wide mt-2">
-        {{ dartStage === 0 ? '스페이스바로 조준 고정!' : dartStage === 1 ? '스페이스바를 한번 더 눌러 발사!' : '발사 중...' }}
+        {{ dartStage === 0 ? '스페이스바로 방향 고정!' : dartStage === 1 ? '스페이스바를 꾹 눌러 파워 충전!' : dartStage === 2 ? '떼는 순간 발사! (파워 조절)' : '발사 중...' }}
       </div>
     </div>
 
@@ -275,19 +275,26 @@ const lockAim = () => {
   dartStage.value = 1
 }
 
-const chargeAndThrow = () => {
+// 스페이스바를 누르고 있는 동안 게이지가 0↔100 사이를 왕복(kick)
+let powerDir = 1
+const startCharge = () => {
   dartStage.value = 2
   power.value = 0
+  powerDir = 1
   const step = () => {
-    power.value = Math.min(100, power.value + 8)
-    if (power.value < 100) {
-      powerRAF = requestAnimationFrame(step)
-    } else {
-      powerRAF = null
-      throwDart()
-    }
+    power.value += 2.2 * powerDir
+    if (power.value >= 100) { power.value = 100; powerDir = -1 }
+    if (power.value <= 0) { power.value = 0; powerDir = 1 }
+    powerRAF = requestAnimationFrame(step)
   }
   powerRAF = requestAnimationFrame(step)
+}
+
+// 스페이스바를 떼는 순간 현재 파워로 발사
+const releaseThrow = () => {
+  if (powerRAF) { cancelAnimationFrame(powerRAF); powerRAF = null }
+  dartStage.value = 3
+  throwDart()
 }
 
 const throwDart = () => {
@@ -348,8 +355,15 @@ const computeDartOutcome = () => {
 const handleKeydown = (e) => {
   if (e.code !== 'Space' || gameMode.value !== 'dart' || selected.value) return
   e.preventDefault()
-  if (dartStage.value === 0) lockAim()
-  else if (dartStage.value === 1) chargeAndThrow()
+  if (e.repeat) return
+  if (dartStage.value === 0) lockAim()        // 1) 방향 고정
+  else if (dartStage.value === 1) startCharge() // 2) 누르고 있으면 파워 충전
+}
+
+const handleKeyup = (e) => {
+  if (e.code !== 'Space' || gameMode.value !== 'dart' || selected.value) return
+  e.preventDefault()
+  if (dartStage.value === 2) releaseThrow()   // 3) 떼면 발사
 }
 
 /* ---------- 슬롯머신 (릴 회전) ---------- */
@@ -414,6 +428,7 @@ onMounted(async () => {
   await loadDatasets()
   await initLeafletMap()
   window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('keyup', handleKeyup)
   if (gameMode.value === 'dart') startNeedle()
 })
 
@@ -424,6 +439,7 @@ onBeforeUnmount(() => {
   if (reelSpinTimer) clearInterval(reelSpinTimer)
   if (resizeHandler) window.removeEventListener('resize', resizeHandler)
   window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('keyup', handleKeyup)
 })
 </script>
 
