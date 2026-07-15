@@ -17,7 +17,7 @@ function toCoupon(d) {
     .filter((x) => x && x !== '-' && x !== d.dcCondition)
     .join(' · ')
   // 사랑가게 할인 = 전남 사랑애 서포터즈(도민증) 혜택 → 신청 링크 연결
-  return { couponNm: label, badge, dcCondition: cond, link: 'https://love.jeonnam.go.kr/jns/main' }
+  return { couponNm: label, badge, dcCondition: cond, link: 'https://love.jeonnam-gwangju.go.kr/jns/main' }
 }
 
 // 사랑가게 목록을 매칭용으로 가공 (이름 + 좌표 + 쿠폰)

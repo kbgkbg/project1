@@ -44,7 +44,7 @@ const LOCAL_BENEFITS = {
   함평군: [{ title: '함평 천지몰 2만원 쿠폰', detail: '관내 소비 3만원 이상 인증 시' }],
 }
 
-export function getRegionBenefits(address = '') {
+export function getRegionBenefits(address = '', category = '') {
   const benefits = []
 
   // 전 지역 공통 (지역사랑상품권) — 별도 신청 링크 없음
@@ -68,8 +68,11 @@ export function getRegionBenefits(address = '') {
     })
   }
 
-  // 2026 여름맞이 숙박세일 페스타 = 숙박 금액대별 할인
-  if (LODGING_DISCOUNT_REGIONS.some((r) => address.includes(r))) {
+  // 2026 여름맞이 숙박세일 페스타 = 숙박 장소에만 표시
+  if (
+    category === '숙박' &&
+    LODGING_DISCOUNT_REGIONS.some((r) => address.includes(r))
+  ) {
     benefits.push({
       tag: '숙박',
       title: '2026 여름맞이 숙박세일 페스타',

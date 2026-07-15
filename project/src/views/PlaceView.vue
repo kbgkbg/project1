@@ -30,7 +30,7 @@ const initial = computed(() => place.name?.trim()?.[0] ?? '?')
 const imgError = ref(false) // 이미지 로딩 실패 시 글자 플레이스홀더로 전환
 
 // 주소에서 시군구를 읽어 해당 지역 여행 혜택을 자동 매칭
-const regionBenefits = computed(() => getRegionBenefits(place.address))
+const regionBenefits = computed(() => getRegionBenefits(place.address, place.category))
 
 // 뽑힌 장소가 사랑가게 목록에 있으면 그 가게 할인을 가져옴 (장소에 이미 쿠폰이 있으면 그걸 우선)
 const storeCoupons = computed(() =>
@@ -66,18 +66,26 @@ async function sendMessage() {
   chatInput.value = ''
   scrollChatToBottom()
 
-  // ─── TODO: 여기를 실제 OpenAI 호출로 교체 ───
-  // const reply = await useOpenAI().ask(text, { place })  // place 정보를 컨텍스트로 넘김
-  // messages.value.push({ role: 'bot', text: reply })
-  // ────────────────────────────────────────────
-  // (지금은 가짜 응답)
-  setTimeout(() => {
-    messages.value.push({
-      role: 'bot',
-      text: `"${place.name}" 주변 추천은 곧 챗봇 API와 연결하면 자동으로 답해드려요. (지금은 예시 응답)`,
-    })
-    scrollChatToBottom()
-  }, 500)
+  const history = messages.value.map(m => ({
+    role: m.role === 'bot' ? 'assistant' : 'user',
+    content: m.text,
+  }))
+
+  const reply = await fetch('/.netlify/functions/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: history,
+      placeName: place.name,
+      placeAddress: place.address,
+    }),
+  })
+    .then(r => r.json())
+    .then(d => d.reply)
+    .catch(() => '응답을 가져오지 못했어요. 잠시 후 다시 시도해주세요.')
+
+  messages.value.push({ role: 'bot', text: reply })
+  scrollChatToBottom()
 }
 
 const chatSuggestions = ['근처 맛집 추천', '가볼 만한 관광지', '주차 가능한 곳']
@@ -100,7 +108,7 @@ function loadReviews() {
   } else {
     // 데모용 샘플 후기 (비어 보이지 않게). 실제 배포 땐 지워도 됨.
     reviews.value = [
-      { id: 1, title: '분위기 좋아요', content: '완도 여행 왔다가 들렀는데 사장님이 친절하셨어요!', password: '1234', createdAt: '2026-07-10' },
+      { id: 1, title: '분위기 좋아요', content: '처음 왔는데 사장님이 친절하셨어요!', password: '1234', createdAt: '2026-07-10' },
       { id: 2, title: '재방문 의사 100%', content: '쿠폰 할인까지 받아서 만족스러운 식사였습니다.', password: '1234', createdAt: '2026-07-12' },
     ]
     saveReviews()
@@ -261,13 +269,23 @@ onMounted(() => {
         <h3 class="sub-title">전남 사랑애 서포터즈 혜택</h3>
         <p class="sub-note">전남 사랑 도민증 발급 시 할인 적용</p>
         <div class="coupon-list">
-          <div v-for="(c, i) in storeCoupons" :key="'c' + i" class="coupon">
+          <component
+            :is="c.link ? 'a' : 'div'"
+            v-for="(c, i) in storeCoupons"
+            :key="'c' + i"
+            class="coupon"
+            :class="{ linked: c.link }"
+            :href="c.link"
+            :target="c.link ? '_blank' : undefined"
+            :rel="c.link ? 'noopener noreferrer' : undefined"
+          >
             <div class="coupon-left">
               <span class="coupon-name">{{ c.couponNm }}</span>
               <span v-if="c.dcCondition" class="coupon-cond">{{ c.dcCondition }}</span>
+              <span v-if="c.link" class="apply">신청하기 ↗</span>
             </div>
             <span class="coupon-value">{{ c.badge }}</span>
-          </div>
+          </component>
         </div>
       </template>
 
@@ -481,6 +499,8 @@ onMounted(() => {
 .empty { color: var(--muted); font-size: 14px; }
 
 /* 혜택 카드 */
+.linked { cursor: pointer; text-decoration: none; color: inherit; }
+.linked:hover { opacity: 0.8; }
 .benefit-card { background: var(--pearl); color: var(--accent-ink); }
 .benefit-grid {
   display: grid;
