@@ -19,7 +19,7 @@
       </div>
     </header>
 
-    <main class="flex-1 w-full mx-auto flex flex-col gap-6 pt-[84px] overflow-auto px-4">
+    <main class="flex-1 w-full mx-auto flex flex-col gap-6 pt-[84px] overflow-auto px-4 min-h-0">
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <button @click="setGameMode('dart')" :class="gameMode==='dart' ? activeModeClass : inactiveModeClass" class="border-2 p-4 rounded-2xl">
           <div class="flex items-center gap-3">
@@ -52,8 +52,8 @@
             </div>
           </div>
 
-          <div class="relative w-full flex-1 rounded-xl overflow-hidden border border-slate-800 bg-[#070b13]">
-            <div ref="mapContainer" class="w-full h-full"></div>
+          <div class="relative w-full flex-1 rounded-xl overflow-hidden border border-slate-800 bg-[#070b13] min-h-0">
+            <div ref="mapContainer" class="w-full h-96 min-h-0"></div>
 
             <div v-if="dartVisual.visible" :style="dartStyle" class="absolute z-30 transition-transform">
               <span class="text-3xl drop-shadow-lg">🎯</span>
@@ -111,60 +111,92 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 
 const localTourType = ref('food')
 const gameMode = ref('dart')
 const selected = ref(null)
 const mapContainer = ref(null)
-const mapDemoMode = ref(true)
 
-const foodSpots = [
-  { id:101, name:'광주 송정 떡갈비', emoji:'🍖', lat:35.1328, lng:126.7932, desc:'전설적 떡갈비', gameX:18, gameY:25 },
-  { id:102, name:'여수 낭만 삼합', emoji:'🦑', lat:34.7365, lng:127.7495, desc:'여수 밤바다', gameX:82, gameY:75 },
-  { id:103, name:'순천 짱뚱어탕', emoji:'🐟', lat:34.9301, lng:127.5015, desc:'걸쭉한 국물', gameX:65, gameY:65 }
-]
-const attractionSpots = [
-  { id:201, name:'무등산 주상절리대', emoji:'⛰️', lat:35.1341, lng:126.9890, desc:'주상절리', gameX:44, gameY:48 },
-  { id:202, name:'여수 오동도', emoji:'🌺', lat:34.7441, lng:127.7661, desc:'동백섬', gameX:85, gameY:72 }
-]
+// datasets (loaded from public/dataset/*.json)
+const rawFood = ref([])
+const rawAttraction = ref([])
+const foodSpotsLoaded = ref([])
+const attractionSpotsLoaded = ref([])
+
+const normalizeItem = (item) => {
+  const name = item.name || item.명칭 || item.시설명 || item.title || item.NAME || item.name_ko
+  const lat = item.lat || item.latitude || item.위도 || item.mapy || item.MAPY || item.Y || item.경도 || item.LAT
+  const lng = item.lng || item.longitude || item.경도 || item.mapx || item.MAPX || item.X || item.LNG
+  const desc = item.desc || item.설명 || item.summary || item.소개 || item.firstimage || ''
+  return {
+    id: item.contentid ?? item.id ?? (name ? name : Math.random().toString(36).slice(2, 9)),
+    name,
+    lat: Number(lat),
+    lng: Number(lng),
+    desc,
+    emoji: item.emoji || '📍'
+  }
+}
+
+const loadDatasets = async () => {
+  try {
+    const base = '/dataset'
+    const [foodRes, attrRes] = await Promise.all([
+      fetch(`${base}/광주_전라권_음식점.json`),
+      fetch(`${base}/광주_전라권_관광지.json`)
+    ])
+    rawFood.value = await foodRes.json()
+    rawAttraction.value = await attrRes.json()
+
+    const foodArr = Array.isArray(rawFood.value) ? rawFood.value : (rawFood.value.items || [])
+    const attrArr = Array.isArray(rawAttraction.value) ? rawAttraction.value : (rawAttraction.value.items || [])
+
+    foodSpotsLoaded.value = foodArr.map(normalizeItem).filter(i => i.lat && i.lng)
+    attractionSpotsLoaded.value = attrArr.map(normalizeItem).filter(i => i.lat && i.lng)
+
+    loadActive()
+  } catch (err) {
+    console.error('dataset load failed', err)
+  }
+}
 
 const activeList = ref([])
-const loadActive = () => activeList.value = (localTourType.value === 'food' ? foodSpots : attractionSpots)
+const loadActive = () => {
+  activeList.value = (localTourType.value === 'food' ? foodSpotsLoaded.value : attractionSpotsLoaded.value)
+}
 
 const btnClass = (on) => on ? 'px-3 py-1 bg-teal-500 text-slate-900 rounded-md' : 'px-3 py-1 bg-slate-800 rounded-md'
 const activeModeClass = 'border-amber-500 bg-amber-500/10 text-amber-300'
 const inactiveModeClass = 'border-slate-800 bg-[#101626]/60 text-slate-400'
 const smallBtn = (on) => on ? 'px-3 py-1 bg-teal-500 rounded' : 'px-3 py-1 bg-slate-800 rounded'
 
-/* Leaflet integration */
+/* ---------- Leaflet 연동 (main.js에서 import한 경우를 전제로 함) ---------- */
 const leafletMap = ref(null)
 const leafletMarkers = ref([])
-
-const loadLeafletIfNeeded = async () => {
-  if (typeof L !== 'undefined') return
-  if (!document.querySelector('link[href="https://unpkg.com/leaflet/dist/leaflet.css"]')) {
-    const l = document.createElement('link'); l.rel='stylesheet'; l.href='https://unpkg.com/leaflet/dist/leaflet.css'; document.head.appendChild(l)
-  }
-  if (!document.querySelector('script[src="https://unpkg.com/leaflet/dist/leaflet.js"]')) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script'); s.src='https://unpkg.com/leaflet/dist/leaflet.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s)
-    })
-    await new Promise(r=>setTimeout(r,50))
-  } else {
-    await new Promise(r=>setTimeout(r,50))
-  }
-}
+let resizeHandler = null
 
 const initLeafletMap = async () => {
-  try { await loadLeafletIfNeeded() } catch (e) { console.warn('Leaflet load failed', e); mapDemoMode.value = true; return }
+  if (typeof window.L === 'undefined') {
+    console.warn('Leaflet not found — make sure you import it in main.js')
+    return
+  }
   if (!mapContainer.value) return
-  mapDemoMode.value = false
+
   const center = [35.1601, 126.8514]
   if (!leafletMap.value) {
-    leafletMap.value = L.map(mapContainer.value).setView(center, 9)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors' }).addTo(leafletMap.value)
-    window.addEventListener('resize', () => { if (leafletMap.value) leafletMap.value.invalidateSize() })
+    leafletMap.value = window.L.map(mapContainer.value).setView(center, 9)
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(leafletMap.value)
+
+    resizeHandler = () => { if (leafletMap.value) leafletMap.value.invalidateSize() }
+    window.addEventListener('resize', resizeHandler)
+
+    await nextTick()
+    if (leafletMap.value) leafletMap.value.invalidateSize()
+    // extra invalidate to handle delayed layout/animations that can cause blank tiles
+    setTimeout(() => { if (leafletMap.value) leafletMap.value.invalidateSize() }, 250)
   } else {
     leafletMap.value.setView(center, 9)
   }
@@ -172,89 +204,191 @@ const initLeafletMap = async () => {
 }
 
 const renderLeafletMarkers = () => {
-  leafletMarkers.value.forEach(m => m.remove())
+  leafletMarkers.value.forEach((m) => m.remove())
   leafletMarkers.value = []
   if (!leafletMap.value) return
-  activeList.value.forEach(p => {
-    const m = L.marker([p.lat, p.lng]).addTo(leafletMap.value)
+  activeList.value.forEach((p) => {
+    const m = window.L.marker([p.lat, p.lng]).addTo(leafletMap.value)
     m.on('click', () => { selected.value = p; leafletMap.value.panTo([p.lat, p.lng]) })
     leafletMarkers.value.push(m)
   })
 }
 
+const selectAndCenter = (p) => {
+  selected.value = p
+  if (leafletMap.value) leafletMap.value.panTo([p.lat, p.lng])
+}
+
 watch(selected, (v) => {
   if (!v || !leafletMap.value) return
   leafletMap.value.panTo([v.lat, v.lng])
-  L.popup().setLatLng([v.lat, v.lng]).setContent(`<div style="padding:6px">${v.emoji||''} ${v.name}</div>`).openOn(leafletMap.value)
+  window.L.popup()
+    .setLatLng([v.lat, v.lng])
+    .setContent(`<div style="padding:6px">${v.emoji || ''} ${v.name}</div>`)
+    .openOn(leafletMap.value)
 })
 
-/* dart mechanics */
-const dartVisual = reactive({ visible:false, x:0, y:0 })
-const aiming = ref(false), charging = ref(false), needleDeg = ref(0), power = ref(50), canThrow = ref(false)
-let needleDir = 1, needleRAF = null
+/* ---------- 다트 게임 로직 ---------- */
+const dartVisual = reactive({ visible: false, x: 0, y: 0 })
+const aiming = ref(false)
+const charging = ref(false)
+const needleDeg = ref(0)
+const power = ref(50)
+const canThrow = ref(false)
+let needleDir = 1
+let needleRAF = null
+let chargeInterval = null
 
-const startNeedle = () => { if (needleRAF) return; const step = () => { needleDeg.value += 1.6*needleDir; if (needleDeg.value>80) needleDir=-1; if (needleDeg.value<-80) needleDir=1; needleRAF = requestAnimationFrame(step) }; needleRAF = requestAnimationFrame(step) }
+const startNeedle = () => {
+  if (needleRAF) return
+  const step = () => {
+    needleDeg.value += 1.6 * needleDir
+    if (needleDeg.value > 80) needleDir = -1
+    if (needleDeg.value < -80) needleDir = 1
+    needleRAF = requestAnimationFrame(step)
+  }
+  needleRAF = requestAnimationFrame(step)
+}
 const stopNeedle = () => { if (needleRAF) cancelAnimationFrame(needleRAF); needleRAF = null }
 
-const toggleAim = () => { aiming.value = !aiming.value; if (aiming.value) startNeedle(); else stopNeedle(); charging.value=false; power.value=50; canThrow.value=false }
-const toggleCharge = () => { if (!aiming.value) return; charging.value=!charging.value; if (charging.value) { const iv=setInterval(()=>{ power.value=Math.min(100,power.value+6); if (!charging.value||power.value>=100) { clearInterval(iv); charging.value=false; canThrow.value=true } },120) } else canThrow.value=true }
+const toggleAim = () => {
+  aiming.value = !aiming.value
+  if (aiming.value) startNeedle()
+  else stopNeedle()
+  charging.value = false
+  power.value = 50
+  canThrow.value = false
+}
+
+const toggleCharge = () => {
+  if (!aiming.value) return
+  charging.value = !charging.value
+  if (charging.value) {
+    chargeInterval = setInterval(() => {
+      power.value = Math.min(100, power.value + 6)
+      if (!charging.value || power.value >= 100) {
+        clearInterval(chargeInterval)
+        chargeInterval = null
+        charging.value = false
+        canThrow.value = true
+      }
+    }, 120)
+  } else {
+    canThrow.value = true
+  }
+}
 
 const throwDart = () => {
-  if (!canThrow.value) return
-  dartVisual.visible=true
+  if (!canThrow.value || !mapContainer.value) return
+  dartVisual.visible = true
   const rect = mapContainer.value.getBoundingClientRect()
-  const cx = rect.width/2, cy = rect.height/2
-  const len = 0.35*Math.min(rect.width,rect.height)*(0.6+power.value/100)
-  const rad = (needleDeg.value*Math.PI)/180
-  const tx = cx + Math.cos(rad)*len, ty = cy - Math.sin(rad)*len
-  const frames = 20; let f=0; const sx=cx, sy=cy
-  const anim = () => { f++; dartVisual.x = sx + (tx-sx)*(f/frames); dartVisual.y = sy + (ty-sy)*(f/frames); if (f<frames) requestAnimationFrame(anim); else { dartVisual.visible=false; aiming.value=false; stopNeedle(); power.value=50; canThrow.value=false; computeDartOutcome() } }
+  const cx = rect.width / 2
+  const cy = rect.height / 2
+  const len = 0.35 * Math.min(rect.width, rect.height) * (0.6 + power.value / 100)
+  const rad = (needleDeg.value * Math.PI) / 180
+  const tx = cx + Math.cos(rad) * len
+  const ty = cy - Math.sin(rad) * len
+  const frames = 20
+  let f = 0
+  const sx = cx
+  const sy = cy
+
+  const anim = () => {
+    f++
+    dartVisual.x = sx + (tx - sx) * (f / frames)
+    dartVisual.y = sy + (ty - sy) * (f / frames)
+    if (f < frames) {
+      requestAnimationFrame(anim)
+    } else {
+      dartVisual.visible = false
+      aiming.value = false
+      stopNeedle()
+      power.value = 50
+      canThrow.value = false
+      computeDartOutcome()
+    }
+  }
   requestAnimationFrame(anim)
 }
 
-const dartStyle = computed(()=>({ left: dartVisual.x+'px', top: dartVisual.y+'px', transform:'translate(-50%,-50%)' }))
+const dartStyle = computed(() => ({
+  left: dartVisual.x + 'px',
+  top: dartVisual.y + 'px',
+  transform: 'translate(-50%,-50%)'
+}))
 
 const computeDartOutcome = () => {
   if (!leafletMap.value || !activeList.value.length) return
   const center = leafletMap.value.getCenter()
-  const cx = center.lat, cy = center.lng
-  const needleRad = (needleDeg.value*Math.PI)/180
-  const scored = activeList.value.map(p => {
-    const y = p.lat - cx, x = p.lng - cy
-    const b = Math.atan2(y,x)
-    const delta = Math.abs(Math.atan2(Math.sin(b-needleRad), Math.cos(b-needleRad)))
-    return { p, score: 1 - delta/Math.PI }
-  }).sort((a,b)=>b.score-a.score)
+  const cx = center.lat
+  const cy = center.lng
+  const needleRad = (needleDeg.value * Math.PI) / 180
+  const scored = activeList.value
+    .map((p) => {
+      const y = p.lat - cx
+      const x = p.lng - cy
+      const b = Math.atan2(y, x)
+      const delta = Math.abs(Math.atan2(Math.sin(b - needleRad), Math.cos(b - needleRad)))
+      return { p, score: 1 - delta / Math.PI }
+    })
+    .sort((a, b) => b.score - a.score)
+
   selected.value = scored[0].p
-  leafletMap.value.panTo([selected.value.lat, selected.value.lng])
+  if (leafletMap.value) leafletMap.value.panTo([selected.value.lat, selected.value.lng])
 }
 
-/* roulette */
+/* ---------- 룰렛 ---------- */
 const rouletteActive = ref(false)
 const rouletteResult = ref(null)
 let rouletteTimer = null
-const prepareRoulette = () => { rouletteActive.value=false; rouletteResult.value=null }
+
+const prepareRoulette = () => { rouletteActive.value = false; rouletteResult.value = null }
+
 const startRoulette = () => {
   if (!activeList.value.length) return
-  rouletteActive.value=true; rouletteResult.value=null
-  const idx = Math.floor(Math.random()*activeList.value.length)
-  rouletteTimer = setTimeout(()=>{ rouletteResult.value = activeList.value[idx]; selected.value = rouletteResult.value; leafletMap.value.panTo([selected.value.lat, selected.value.lng]); rouletteActive.value=false }, 1400)
+  rouletteActive.value = true
+  rouletteResult.value = null
+  const idx = Math.floor(Math.random() * activeList.value.length)
+  rouletteTimer = setTimeout(() => {
+    rouletteResult.value = activeList.value[idx]
+    selected.value = rouletteResult.value
+    if (leafletMap.value) leafletMap.value.panTo([selected.value.lat, selected.value.lng])
+    rouletteActive.value = false
+  }, 1400)
 }
 
-/* helpers & lifecycle */
-const setTour = (t) => { localTourType.value = t; loadActive(); if (leafletMap.value) renderLeafletMarkers() }
-const setGameMode = (m) => { gameMode.value = m; if (m==='slot') prepareRoulette(); else { rouletteActive.value=false; rouletteResult.value=null } }
-const previewMarkers = () => renderLeafletMarkers()
+/* ---------- 헬퍼 & 라이프사이클 ---------- */
+const setTour = (t) => {
+  localTourType.value = t
+  loadActive()
+  if (leafletMap.value) renderLeafletMarkers()
+}
+
+const setGameMode = (m) => {
+  gameMode.value = m
+  if (m === 'slot') prepareRoulette()
+  else { rouletteActive.value = false; rouletteResult.value = null }
+}
+
 const clearSelection = () => { selected.value = null; renderLeafletMarkers() }
 
 onMounted(async () => {
-  loadActive()
+  await loadDatasets()
   await initLeafletMap()
 })
 
-const gameModeLabel = computed(()=> gameMode.value==='dart' ? 'Dart' : 'Roulette' )
+onBeforeUnmount(() => {
+  stopNeedle()
+  if (chargeInterval) clearInterval(chargeInterval)
+  if (rouletteTimer) clearTimeout(rouletteTimer)
+  if (resizeHandler) window.removeEventListener('resize', resizeHandler)
+})
+
+const gameModeLabel = computed(() => (gameMode.value === 'dart' ? 'Dart' : 'Roulette'))
 </script>
 
 <style scoped>
-.font-title { font-family: 'Black Han Sans', sans-serif; }
+.font-title {
+  font-family: 'Black Han Sans', sans-serif;
+}
 </style>
